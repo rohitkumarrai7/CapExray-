@@ -235,14 +235,15 @@ describe("runAudit", () => {
   it("sets stack health to major_leak for savings over $500", () => {
     const input = makeInput({
       tools: [
-        { toolId: "chatgpt", plan: "Team", monthlySpend: 125, seats: 5 },
-        { toolId: "claude", plan: "Team", monthlySpend: 125, seats: 5 },
-        { toolId: "anthropic-api", plan: "Pay-as-you-go", monthlySpend: 500, seats: 1 },
+        { toolId: "chatgpt", plan: "Team", monthlySpend: 500, seats: 20 },
+        { toolId: "claude", plan: "Team", monthlySpend: 500, seats: 20 },
+        { toolId: "anthropic-api", plan: "Pay-as-you-go", monthlySpend: 1000, seats: 1 },
       ],
-      teamSize: 5,
+      teamSize: 20,
     });
     const result = runAudit(input);
     expect(result.stackHealth).toBe("major_leak");
+    expect(result.totalMonthlySavings).toBeGreaterThan(500);
   });
 
   it("sets stack health to minor_drift for savings between $100 and $500", () => {
