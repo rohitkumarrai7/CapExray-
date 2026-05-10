@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   Download,
   Mail,
+  Target,
+  Activity,
 } from "lucide-react";
 import {
   BarChart,
@@ -23,6 +25,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  AreaChart,
+  Area,
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import {
@@ -413,8 +417,147 @@ function ShareSection({ result }: { result: AuditResult }) {
   );
 }
 
+function SavingsProjection({ monthlySavings }: { monthlySavings: number }) {
+  if (monthlySavings <= 0) return null;
+
+  const months = [3, 6, 12, 24];
+  const data = months.map((m) => ({
+    month: `${m}mo`,
+    cumulative: monthlySavings * m,
+  }));
+
+  return (
+    <motion.div variants={itemVariants}>
+      <Card className="glass-card ring-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <TrendingUp className="size-5 text-emerald-400" />
+            Savings Projection
+          </CardTitle>
+          <CardDescription>Cumulative savings if you implement all recommendations.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
+              <defs>
+                <linearGradient id="savingsGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="month" tick={{ fill: "#a1a1aa", fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "#a1a1aa", fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `$${v.toLocaleString()}`} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "rgba(15, 15, 25, 0.95)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: "8px",
+                  color: "#e4e4e7",
+                  fontSize: 13,
+                }}
+                formatter={(value) => [`$${Number(value).toLocaleString()}`, "Total Saved"]}
+              />
+              <Area type="monotone" dataKey="cumulative" stroke="#10b981" strokeWidth={2} fill="url(#savingsGrad)" />
+            </AreaChart>
+          </ResponsiveContainer>
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {months.map((m) => (
+              <div key={m} className="rounded-lg border border-white/5 bg-[#192121] p-3 text-center">
+                <p className="text-xs text-muted-foreground">{m} months</p>
+                <p className="text-lg font-bold text-emerald-400">${(monthlySavings * m).toLocaleString()}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+function BenchmarkBar({ spendPerDev, avgSpendPerDev }: { spendPerDev: number; avgSpendPerDev: number }) {
+  const maxVal = Math.max(spendPerDev, avgSpendPerDev) * 1.4;
+  const userPct = Math.min((spendPerDev / maxVal) * 100, 100);
+  const avgPct = Math.min((avgSpendPerDev / maxVal) * 100, 100);
+
+  return (
+    <motion.div variants={itemVariants}>
+      <Card className="glass-card ring-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Target className="size-5 text-primary" />
+            Spend per Developer vs Industry
+          </CardTitle>
+          <CardDescription>How your AI tool spend per developer compares to similar-stage companies.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Your team</span>
+              <span className={`font-bold ${spendPerDev > avgSpendPerDev ? "text-red-400" : "text-emerald-400"}`}>
+                ${spendPerDev.toFixed(0)}/dev/mo
+              </span>
+            </div>
+            <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${userPct}%` }}
+                transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+                className={`h-full rounded-full ${spendPerDev > avgSpendPerDev ? "bg-red-400" : "bg-emerald-400"}`}
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Industry average</span>
+              <span className="font-bold text-zinc-400">${avgSpendPerDev.toFixed(0)}/dev/mo</span>
+            </div>
+            <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${avgPct}%` }}
+                transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
+                className="h-full rounded-full bg-zinc-500"
+              />
+            </div>
+          </div>
+          <Separator />
+          <p className={`text-sm ${spendPerDev > avgSpendPerDev ? "text-red-400" : "text-emerald-400"}`}>
+            {spendPerDev > avgSpendPerDev
+              ? `You're spending $${(spendPerDev - avgSpendPerDev).toFixed(0)} more per developer than average. The recommendations above can help close this gap.`
+              : `You're $${(avgSpendPerDev - spendPerDev).toFixed(0)} under the industry average per developer. Well done.`}
+          </p>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+function StackHealthBadge({ health, score }: { health: string; score: number }) {
+  const config: Record<string, { label: string; color: string; bg: string; icon: typeof Activity }> = {
+    optimal: { label: "Optimal", color: "text-emerald-400", bg: "bg-emerald-500/15 border-emerald-500/30", icon: CheckCircle2 },
+    minor_drift: { label: "Minor Drift", color: "text-yellow-400", bg: "bg-yellow-500/15 border-yellow-500/30", icon: AlertTriangle },
+    major_leak: { label: "Major Leak", color: "text-red-400", bg: "bg-red-500/15 border-red-500/30", icon: AlertTriangle },
+  };
+
+  const c = config[health] || config.optimal;
+  const Icon = c.icon;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 120, damping: 12, delay: 0.5 }}
+      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 ${c.bg}`}
+    >
+      <Icon className={`size-4 ${c.color}`} />
+      <span className={`text-sm font-semibold ${c.color}`}>Stack Health: {c.label}</span>
+      <span className="text-xs text-muted-foreground">({score}/100)</span>
+    </motion.div>
+  );
+}
+
 export function AuditResults({ result }: AuditResultsProps) {
-  const { totalMonthlySavings, totalAnnualSavings, efficiencyScore, spendPerDev, avgSpendPerDev } = result;
+  const { totalMonthlySavings, totalAnnualSavings, efficiencyScore, spendPerDev, avgSpendPerDev, stackHealth } = result;
   const hasSavings = totalMonthlySavings > 0;
   const isAboveAvg = spendPerDev > avgSpendPerDev;
 
@@ -454,6 +597,7 @@ export function AuditResults({ result }: AuditResultsProps) {
             <p className="text-muted-foreground">No optimization opportunities found right now.</p>
           </div>
         )}
+        <StackHealthBadge health={stackHealth} score={efficiencyScore} />
       </motion.section>
 
       <motion.section
@@ -534,32 +678,11 @@ export function AuditResults({ result }: AuditResultsProps) {
       </motion.section>
 
       <motion.section variants={containerVariants} initial="hidden" animate="visible">
-        <motion.div variants={itemVariants}>
-          <Card className="glass-card ring-0">
-            <CardHeader>
-              <CardTitle className="text-lg">Benchmark Comparison</CardTitle>
-              <CardDescription>How your AI spend compares to similar startups.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Your AI Spend per Developer</p>
-                  <p className="text-3xl font-bold">${spendPerDev.toFixed(0)}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Similar Startups Average</p>
-                  <p className="text-3xl font-bold">${avgSpendPerDev.toFixed(0)}</p>
-                </div>
-              </div>
-              <Separator className="my-4" />
-              <p className={`text-sm ${isAboveAvg ? "text-red-400" : "text-emerald-400"}`}>
-                {isAboveAvg
-                  ? `You're spending $${(spendPerDev - avgSpendPerDev).toFixed(0)} more per developer than similar startups. Consider the recommendations above to reduce costs.`
-                  : `Great job! You're spending $${(avgSpendPerDev - spendPerDev).toFixed(0)} less per developer than similar startups.`}
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <BenchmarkBar spendPerDev={spendPerDev} avgSpendPerDev={avgSpendPerDev} />
+      </motion.section>
+
+      <motion.section variants={containerVariants} initial="hidden" animate="visible">
+        <SavingsProjection monthlySavings={totalMonthlySavings} />
       </motion.section>
 
       {result.overlapDetected && result.overlapTools.length > 0 && (
