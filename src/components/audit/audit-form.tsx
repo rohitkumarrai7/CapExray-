@@ -163,10 +163,16 @@ export function AuditForm() {
     return () => sub.unsubscribe();
   }, [watch]);
 
-  const onSubmit = (data: AuditFormData) => {
-    // Pass live pricing into the audit engine
+  const onSubmit = async (data: AuditFormData) => {
     const result = runAudit(data as AuditInput, pricingData);
     localStorage.setItem("capexray_last_audit", JSON.stringify(result));
+    try {
+      await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result),
+      });
+    } catch {}
     router.push("/report/" + result.slug);
   };
 

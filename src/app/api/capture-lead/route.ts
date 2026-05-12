@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (dbError) {
-      console.error("Supabase insert error:", dbError);
+      // Supabase may not be configured — silently continue
     }
 
     const resendKey = process.env.RESEND_API_KEY;
@@ -72,11 +72,11 @@ export async function POST(req: NextRequest) {
             subject: monthlySavings > 0
               ? `Your AI Spend Audit — $${monthlySavings.toLocaleString()}/mo in potential savings`
               : "Your AI Spend Audit — You're spending efficiently!",
-            text: `Thanks for using CapExray!\n\n${savingsText}${credexCta}\n\nView your full audit results anytime at our site.\n\n— The CapExray Team`,
+            text: `Thanks for using CapExray!\n\n${savingsText}${credexCta}\n\nWe'll remind you to re-audit in 90 days. AI tool pricing changes frequently — new plans, new competitors, and new features can shift what's optimal for your team.\n\n— The CapExray Team`,
           }),
         });
-      } catch (emailError) {
-        console.error("Email send error:", emailError);
+      } catch {
+        // Email sending failed — silently continue
       }
     }
 

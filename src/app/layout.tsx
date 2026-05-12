@@ -14,22 +14,32 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CapExray | Ex-ray your AI spend",
+  metadataBase: new URL("https://cap-exray.vercel.app"),
+  title: "CapExray | Audit your AI tool spend",
   description:
-    "Stop the bleeding. Our clinical-grade diagnostic engine identifies inefficiencies in your AI stack with surgical precision.",
+    "Free audit for Cursor, ChatGPT, Claude, GitHub Copilot & more. Find out if you're overpaying for AI subscriptions. No signup required.",
   openGraph: {
-    title: "CapExray | Ex-ray your AI spend",
+    title: "CapExray | Free AI Spend Audit",
     description:
-      "Free AI spend diagnostic. Find the leaks in your GPU clusters and API calls.",
+      "Find instant savings on your AI tool stack. Built for startup founders and engineering managers.",
     type: "website",
-    url: "https://capexray.app",
+    url: "https://cap-exray.vercel.app",
     siteName: "CapExray",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "CapExray AI Spend Audit",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "CapExray | Ex-ray your AI spend",
+    title: "CapExray | Free AI Spend Audit",
     description:
-      "Free AI spend diagnostic. Find the leaks in your GPU clusters and API calls.",
+      "Find instant savings on your AI tool stack. Built for startup founders and engineering managers.",
+    images: ["/og-image.png"],
   },
 };
 
@@ -41,6 +51,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${inter.variable} ${jetbrainsMono.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

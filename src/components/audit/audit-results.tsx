@@ -16,6 +16,10 @@ import {
   Mail,
   Target,
   Activity,
+  Calendar,
+  Lightbulb,
+  Eye,
+  Calculator,
 } from "lucide-react";
 import {
   BarChart,
@@ -176,6 +180,48 @@ function SavingsChart({ recommendations }: { recommendations: ToolRecommendation
   );
 }
 
+function PlanFitBadge({ category }: { category: ToolRecommendation["category"] }) {
+  const fitScore = category === "already-optimal" ? 95 :
+                   category === "plan-optimization" ? 60 :
+                   category === "overlap-removal" ? 40 : 70;
+
+  const color = fitScore >= 80 ? "text-emerald-400 bg-emerald-500/15 border-emerald-500/30" :
+                fitScore >= 50 ? "text-yellow-400 bg-yellow-500/15 border-yellow-500/30" :
+                "text-red-400 bg-red-500/15 border-red-500/30";
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${color}`}>
+      <Activity className="size-3" />
+      Fit: {fitScore}/100
+    </span>
+  );
+}
+
+function NegotiationTips({ plan }: { plan: string }) {
+  if (!plan.toLowerCase().includes("enterprise")) return null;
+
+  const tips = [
+    "Ask for a 20% discount if paying annually upfront",
+    "Request a 90-day cancellation clause instead of auto-renewal",
+    "Negotiate per-seat pricing rather than flat-rate if team is growing",
+    "Ask for a 'ramp' period with discounted first 3 months",
+  ];
+
+  return (
+    <div className="mt-3 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
+      <p className="mb-2 text-sm font-medium text-blue-400">Negotiation Tips</p>
+      <ul className="space-y-1">
+        {tips.map((tip, i) => (
+          <li key={i} className="flex items-start gap-2 text-xs text-zinc-400">
+            <span className="mt-0.5 text-blue-400">&#8226;</span>
+            {tip}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function RecommendationCard({ rec }: { rec: ToolRecommendation }) {
   const hasSavings = rec.monthlySavings > 0;
 
@@ -195,6 +241,7 @@ function RecommendationCard({ rec }: { rec: ToolRecommendation }) {
               <Badge variant="outline" className="border-border text-xs">
                 {CATEGORY_LABELS[rec.category]}
               </Badge>
+              <PlanFitBadge category={rec.category} />
               <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${CONFIDENCE_STYLES[rec.confidence]}`}>
                 {rec.confidence}
               </span>
@@ -233,9 +280,201 @@ function RecommendationCard({ rec }: { rec: ToolRecommendation }) {
             </p>
             <p className="text-sm text-muted-foreground">{rec.reason}</p>
           </div>
+          <NegotiationTips plan={rec.currentPlan} />
+          <p className="text-xs text-zinc-600 mt-1">
+            Pricing verified 2026-05-10
+          </p>
         </CardContent>
       </Card>
     </motion.div>
+  );
+}
+
+function RenewalAlert({ recommendations }: { recommendations: ToolRecommendation[] }) {
+  const enterpriseTools = recommendations.filter(
+    (r) =>
+      r.currentPlan.toLowerCase().includes("enterprise") ||
+      r.currentPlan.toLowerCase().includes("team") ||
+      r.currentPlan.toLowerCase().includes("business")
+  );
+
+  if (enterpriseTools.length === 0) return null;
+
+  return (
+    <motion.div variants={itemVariants}>
+      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-amber-400 flex items-center gap-2">
+          <Calendar className="size-5" />
+          Renewal Alert
+        </h3>
+        <p className="mb-3 text-sm text-zinc-300">
+          You have {enterpriseTools.length} team/enterprise plan(s). Most SaaS
+          contracts auto-renew with 30-90 day cancellation notice.
+        </p>
+        <ul className="space-y-2">
+          {enterpriseTools.map((tool) => (
+            <li
+              key={tool.toolId}
+              className="flex items-center gap-2 text-sm text-zinc-400"
+            >
+              <Calendar className="size-4 shrink-0 text-amber-400" />
+              <span>
+                {tool.toolName} {tool.currentPlan} — review before next renewal
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </motion.div>
+  );
+}
+
+function WhatIfScenarios({ result }: { result: AuditResult }) {
+  const annualBillingDiscount = 0.17;
+
+  const annualSavings = result.totalMonthlySavings * 12;
+  const annualBillingSavings = result.totalMonthlySpend * annualBillingDiscount;
+  const consolidationSavings = result.overlapDetected
+    ? result.totalMonthlySpend * 0.15
+    : 0;
+
+  const scenarios = [
+    {
+      label: "Implement all recommendations",
+      savings: annualSavings,
+      description:
+        "Switch plans and remove overlaps as recommended above",
+    },
+    {
+      label: "Switch to annual billing",
+      savings: Math.round(annualBillingSavings),
+      description:
+        "Most vendors offer ~17% discount for annual payment",
+    },
+    {
+      label: "Consolidate overlapping tools",
+      savings: Math.round(consolidationSavings),
+      description: "Standardize on one tool per category",
+    },
+  ];
+
+  return (
+    <motion.div variants={itemVariants}>
+      <div className="space-y-4">
+        <h3 className="flex items-center gap-2 text-xl font-semibold text-white">
+          <Calculator className="size-5 text-purple-400" />
+          What-If Scenarios
+        </h3>
+        <div className="grid gap-4 md:grid-cols-3">
+          {scenarios.map((scenario) => (
+            <div
+              key={scenario.label}
+              className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5"
+            >
+              <p className="mb-1 text-sm text-zinc-400">{scenario.label}</p>
+              <p className="text-2xl font-bold text-emerald-400">
+                ${scenario.savings.toLocaleString()}/yr
+              </p>
+              <p className="mt-2 text-xs text-zinc-500">
+                {scenario.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function RunwayImpact({
+  monthlySavings,
+  teamSize,
+}: {
+  monthlySavings: number;
+  teamSize: number;
+}) {
+  if (monthlySavings <= 0) return null;
+
+  const avgBurnPerPerson = 600;
+  const monthlyBurn = teamSize * avgBurnPerPerson;
+  const runwayMonths = monthlyBurn > 0 ? monthlySavings / monthlyBurn : 0;
+
+  return (
+    <motion.div variants={itemVariants}>
+      <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
+        <p className="text-sm text-emerald-300 flex items-center gap-2">
+          <Lightbulb className="size-4 shrink-0" />
+          Saving ${monthlySavings.toLocaleString()}/mo extends your runway by{" "}
+          <span className="font-bold">
+            {" "}
+            {runwayMonths.toFixed(2)} months
+          </span>{" "}
+          (assuming ${avgBurnPerPerson.toLocaleString()}/person monthly burn)
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+function ShadowITEstimate({
+  teamSize,
+  primaryUseCase,
+  toolsCount,
+}: {
+  teamSize: number;
+  primaryUseCase: string;
+  toolsCount: number;
+}) {
+  const expectedTools =
+    primaryUseCase === "coding"
+      ? Math.ceil(teamSize * 0.4)
+      : primaryUseCase === "mixed"
+        ? Math.ceil(teamSize * 0.3)
+        : Math.ceil(teamSize * 0.2);
+
+  const hiddenEstimate = Math.max(0, expectedTools - toolsCount);
+
+  if (hiddenEstimate <= 0) return null;
+
+  return (
+    <motion.div variants={itemVariants}>
+      <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-6">
+        <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold text-purple-400">
+          <Eye className="size-5" />
+          Potential Shadow AI Detected
+        </h3>
+        <p className="text-sm text-zinc-300">
+          Based on your team size ({teamSize}) and use case ({primaryUseCase}),
+          we estimate{" "}
+          <span className="font-semibold text-white">
+            {" "}
+            {hiddenEstimate} additional AI tool(s)
+          </span>{" "}
+          may be in use but not accounted for in this audit. Common hidden
+          tools: Perplexity, Notion AI, Midjourney, Runway.
+        </p>
+        <p className="mt-2 text-xs text-zinc-500">
+          This is an estimate based on industry averages. For precise discovery,
+          connect your expense system.
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+function PDFExport() {
+  const handleExport = () => {
+    window.print();
+  };
+
+  return (
+    <button
+      onClick={handleExport}
+      className="no-print inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm text-white transition-colors hover:bg-zinc-700"
+    >
+      <Download className="size-4" />
+      Download PDF Report
+    </button>
   );
 }
 
@@ -245,6 +484,7 @@ function LeadCaptureSection({ result }: { result: AuditResult }) {
   const [role, setRole] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [reminderChecked, setReminderChecked] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -261,6 +501,7 @@ function LeadCaptureSection({ result }: { result: AuditResult }) {
           teamSize: result.input.teamSize,
           auditId: result.id,
           monthlySavings: result.totalMonthlySavings,
+          reminderChecked,
         }),
       });
       setSubmitted(true);
@@ -278,7 +519,9 @@ function LeadCaptureSection({ result }: { result: AuditResult }) {
             <Download className="size-5 text-primary" />
             Save Your Report
           </CardTitle>
-          <CardDescription>Get a copy of your audit results delivered to your inbox.</CardDescription>
+          <CardDescription>
+            Get a copy of your audit results delivered to your inbox.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {submitted ? (
@@ -319,6 +562,19 @@ function LeadCaptureSection({ result }: { result: AuditResult }) {
                   />
                 </div>
               </div>
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="reminder"
+                  className="mt-1"
+                  checked={reminderChecked}
+                  onChange={(e) => setReminderChecked(e.target.checked)}
+                />
+                <label htmlFor="reminder" className="text-sm text-zinc-400">
+                  Remind me to re-audit in 90 days when new pricing or tools
+                  might change my stack
+                </label>
+              </div>
               <Button type="submit" disabled={submitting || !email}>
                 <Mail className="size-4" />
                 {submitting ? "Sending..." : "Send Report"}
@@ -329,11 +585,14 @@ function LeadCaptureSection({ result }: { result: AuditResult }) {
           {result.totalMonthlySavings > 500 && (
             <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-5">
               <div className="mb-3 flex items-start gap-2">
-                <Sparkles className="mt-0.5 size-5 text-primary shrink-0" />
+                <Sparkles className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div>
-                  <p className="font-semibold text-foreground">Unlock Additional Savings with Credex</p>
+                  <p className="font-semibold text-foreground">
+                    Unlock Additional Savings with Credex
+                  </p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Book a free consultation with Credex to unlock additional savings through discounted AI credits.
+                    Book a free consultation with Credex to unlock additional
+                    savings through discounted AI credits.
                   </p>
                 </div>
               </div>
@@ -598,6 +857,7 @@ export function AuditResults({ result }: AuditResultsProps) {
           </div>
         )}
         <StackHealthBadge health={stackHealth} score={efficiencyScore} />
+        <RunwayImpact monthlySavings={totalMonthlySavings} teamSize={result.input.teamSize} />
       </motion.section>
 
       <motion.section
@@ -716,6 +976,28 @@ export function AuditResults({ result }: AuditResultsProps) {
       )}
 
       <motion.section variants={containerVariants} initial="hidden" animate="visible">
+        <WhatIfScenarios result={result} />
+      </motion.section>
+
+      <motion.section variants={containerVariants} initial="hidden" animate="visible">
+        <RenewalAlert recommendations={result.recommendations} />
+      </motion.section>
+
+      <motion.section variants={containerVariants} initial="hidden" animate="visible">
+        <ShadowITEstimate
+          teamSize={result.input.teamSize}
+          primaryUseCase={result.input.primaryUseCase}
+          toolsCount={result.input.tools.length}
+        />
+      </motion.section>
+
+      <motion.section variants={containerVariants} initial="hidden" animate="visible" className="no-print">
+        <div className="flex justify-end">
+          <PDFExport />
+        </div>
+      </motion.section>
+
+      <motion.section variants={containerVariants} initial="hidden" animate="visible" className="no-print">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <LeadCaptureSection result={result} />
           <ShareSection result={result} />

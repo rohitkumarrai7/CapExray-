@@ -2,11 +2,36 @@
 
 **See through your AI stack. Find the leaks. Keep the tools.** CapExray is a free web app that diagnoses startup AI spending and identifies savings opportunities across Cursor, ChatGPT, Claude, GitHub Copilot, Gemini, Windsurf, and API usage. Built for founders, CTOs, and engineering managers who want to know if they're misallocating AI budget.
 
-[Live Demo](https://capexray.app) | [Run Your Diagnosis](https://capexray.app/diagnose)
+[Live Demo](https://cap-exray.vercel.app) | [Run Your Diagnosis](https://cap-exray.vercel.app/diagnose)
 
 ## Screenshots
 
-*Screenshots to be added after deployment.*
+### Landing Page
+![Landing Page](/screenshots/landing.png)
+
+### Audit Form
+![Audit Form](/screenshots/audit-form.png)
+
+### Results Page
+![Results Page](/screenshots/results.png)
+
+### Share Modal
+![Share Modal](/screenshots/share.png)
+
+## Features
+
+- **Plan Optimization** — Find out if you're on the wrong plan tier for your team size
+- **Stack Overlap Detection** — Identify redundant tools (Cursor + Copilot, ChatGPT + Claude)
+- **Spend Benchmarking** — Compare your AI spend per developer against industry averages
+- **What-If Scenarios** — Model annual billing, consolidation, and full optimization
+- **Renewal Calendar** — Track team/enterprise plans with auto-renewal risk
+- **Runway Impact** — See savings in months of startup runway, not just dollars
+- **Shadow IT Estimate** — Detect potential unreported AI tool usage
+- **Negotiation Tips** — Enterprise contract negotiation playbook
+- **PDF Export** — Print-ready audit reports for board decks
+- **Shareable Reports** — Public URLs with dynamic OG metadata
+- **Quarterly Re-audit** — Email reminder to re-audit in 90 days
+- **Embeddable Widget** — iframe-embeddable audit form for blogs
 
 ## Quick Start
 

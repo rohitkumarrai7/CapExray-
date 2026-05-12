@@ -19,11 +19,13 @@ export async function POST(req: NextRequest) {
       total_monthly_savings: auditData.totalMonthlySavings,
       total_annual_savings: auditData.totalAnnualSavings,
       efficiency_score: auditData.efficiencyScore,
+      stack_health: auditData.stackHealth || "optimal",
       spend_per_dev: auditData.spendPerDev,
       avg_spend_per_dev: auditData.avgSpendPerDev,
       overlap_detected: auditData.overlapDetected || false,
       overlap_tools: auditData.overlapTools || [],
       summary: auditData.summary || "",
+      input: auditData.input || null,
       recommendations: auditData.recommendations.map(
         (r: {
           toolId: string;
@@ -61,7 +63,6 @@ export async function POST(req: NextRequest) {
       .upsert(publicData, { onConflict: "slug" });
 
     if (error) {
-      console.error("Supabase upsert error:", error);
       return NextResponse.json({ slug, stored: false });
     }
 

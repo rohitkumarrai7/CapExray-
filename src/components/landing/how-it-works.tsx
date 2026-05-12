@@ -1,30 +1,30 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Layers, Microscope, FileText } from "lucide-react";
+import { ClipboardList, Zap, Share2 } from "lucide-react";
 
 const steps = [
   {
-    phase: "PHASE 01",
-    title: "Input Stack",
-    desc: "Connect your cloud providers and API gateways via secure, read-only telemetry bridges.",
-    icon: Layers,
+    phase: "STEP 1",
+    title: "Enter your AI tools & plans",
+    desc: "Tell us which AI tools your team uses, what plans you're on, and how many seats. Takes 60 seconds.",
+    icon: ClipboardList,
     borderColor: "border-l-[#22D3EE]",
     iconColor: "text-[#22D3EE]",
   },
   {
-    phase: "PHASE 02",
-    title: "AI Diagnostic",
-    desc: "Our engine scans every request, detecting pattern anomalies and token inefficiencies in real-time.",
-    icon: Microscope,
+    phase: "STEP 2",
+    title: "Get instant savings audit",
+    desc: "Our audit engine analyzes your stack for plan optimization, overlaps, and billing inefficiencies in real-time.",
+    icon: Zap,
     borderColor: "border-l-[#F59E0B]",
     iconColor: "text-[#F59E0B]",
   },
   {
-    phase: "PHASE 03",
-    title: "Instant Report",
-    desc: "Receive a comprehensive surgical plan to reclaim wasted spend and optimize cluster health.",
-    icon: FileText,
+    phase: "STEP 3",
+    title: "Share results & save",
+    desc: "Get a shareable report with specific recommendations. Share with your team or CFO and start saving immediately.",
+    icon: Share2,
     borderColor: "border-l-[#10B981]",
     iconColor: "text-[#10B981]",
   },
@@ -32,13 +32,17 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="mx-auto max-w-7xl px-4 py-24 md:px-6">
+    <section
+      id="how-it-works"
+      className="mx-auto max-w-7xl px-4 py-24 md:px-6"
+    >
       <div className="mb-16 text-center">
         <h2 className="mb-4 font-sans text-[32px] font-semibold tracking-tight text-[#F8FAFC]">
-          Surgical Workflow
+          How It Works
         </h2>
         <p className="mx-auto max-w-xl text-[#94A3B8]">
-          Precision diagnostic execution through our proprietary three-stage infrastructure audit.
+          Three steps to a leaner AI stack. No signup, no credit card, no
+          BS.
         </p>
       </div>
 

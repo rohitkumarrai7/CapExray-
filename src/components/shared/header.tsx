@@ -13,11 +13,10 @@ export function Header() {
       </Link>
 
       <nav className="hidden items-center gap-6 md:flex">
-        <a href="#" className="font-mono text-xs font-bold text-[#c3c6d4]">Product</a>
-        <a href="#how-it-works" className="font-mono text-xs text-[#94A3B8] transition-colors hover:bg-[#353435] rounded px-2 py-1">Methodology</a>
-        <a href="#faq" className="font-mono text-xs text-[#94A3B8] transition-colors hover:bg-[#353435] rounded px-2 py-1">Pricing</a>
+        <a href="#how-it-works" className="font-mono text-xs text-[#94A3B8] transition-colors hover:text-[#F8FAFC] rounded px-2 py-1">How It Works</a>
+        <a href="#faq" className="font-mono text-xs text-[#94A3B8] transition-colors hover:text-[#F8FAFC] rounded px-2 py-1">FAQ</a>
         <Link href="/diagnose" className="rounded bg-[#10B981] px-4 py-2 font-mono text-xs font-bold text-[#2c303b] transition-transform active:scale-95">
-          Start Free Diagnostic
+          Audit My Stack
         </Link>
       </nav>
     </header>

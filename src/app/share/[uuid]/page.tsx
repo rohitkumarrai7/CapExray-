@@ -7,7 +7,9 @@ interface PageProps {
   params: Promise<{ uuid: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { uuid } = await params;
   const { data } = await supabase
     .from("audits")
@@ -16,52 +18,72 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .single();
 
   if (!data) {
-    return { title: "Diagnosis Not Found — CapExray" };
+    return {
+      title: "CapExray | AI Spend Audit",
+      description: "Free AI tool spend audit for startups.",
+    };
   }
 
-  const savingsText =
-    data.total_monthly_savings > 0
-      ? `$${data.total_monthly_savings}/mo in potential savings`
-      : "AI stack running efficiently";
+  const savings = data.total_monthly_savings || 0;
+  const toolCount = data.recommendations?.length || 0;
+
+  const title =
+    savings > 0
+      ? `CapExray | $${savings.toLocaleString()}/mo in AI savings found`
+      : "CapExray | AI stack is well-optimized";
+
+  const description =
+    savings > 0
+      ? `Audit of ${toolCount} AI tools found $${(data.total_annual_savings || 0).toLocaleString()}/year in potential savings.`
+      : `Audit of ${toolCount} AI tools — no significant savings opportunities found.`;
 
   return {
-    title: `AI Stack Diagnosis — ${savingsText} | CapExray`,
-    description: data.summary || `CapExray diagnosis result: ${savingsText}`,
+    title,
+    description,
     openGraph: {
-      title: `AI Stack Diagnosis — ${savingsText}`,
-      description: data.summary || `CapExray diagnosis: ${savingsText}`,
-      type: "website",
-      url: `https://capexray.app/share/${uuid}`,
+      title,
+      description,
+      type: "article",
+      url: `https://cap-exray.vercel.app/share/${uuid}`,
       siteName: "CapExray",
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `AI Stack Diagnosis — ${savingsText}`,
-      description: data.summary || `CapExray diagnosis: ${savingsText}`,
+      title,
+      description,
+      images: ["/og-image.png"],
     },
   };
 }
 
 export default async function SharePage({ params }: PageProps) {
   const { uuid } = await params;
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("audits")
     .select("*")
     .or(`public_uuid.eq.${uuid},slug.eq.${uuid}`)
     .single();
 
-  if (!data) {
+  if (error || !data) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
-        <h1 className="text-2xl font-bold">Diagnosis Not Found</h1>
+        <h1 className="text-2xl font-bold">Audit Not Found</h1>
         <p className="text-muted-foreground">
-          This diagnosis link may have expired or doesn&apos;t exist.
+          This audit link may have expired or doesn&apos;t exist.
         </p>
         <Link
           href="/diagnose"
           className="text-primary underline underline-offset-4"
         >
-          Run your own diagnosis
+          Run your own audit
         </Link>
       </div>
     );
@@ -73,7 +95,6 @@ export default async function SharePage({ params }: PageProps) {
     totalMonthlySavings: data.total_monthly_savings,
     totalAnnualSavings: data.total_annual_savings,
     efficiencyScore: data.efficiency_score,
-    stackHealth: data.stack_health || "optimal",
     spendPerDev: data.spend_per_dev,
     avgSpendPerDev: data.avg_spend_per_dev,
     overlapDetected: data.overlap_detected,

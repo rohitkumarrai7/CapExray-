@@ -1,57 +1,78 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Header } from "@/components/shared/header";
 import { Footer } from "@/components/shared/footer";
 import { AuditResults } from "@/components/audit/audit-results";
-import type { AuditResult } from "@/types/audit";
+import { supabase } from "@/lib/supabase";
+import type { AuditResult, ToolRecommendation } from "@/types/audit";
+import { ReportClientFallback } from "./report-client-fallback";
 
-export default function ReportPage() {
-  const router = useRouter();
-  const [result, setResult] = useState<AuditResult | null>(null);
-  const [loading, setLoading] = useState(true);
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("capexray_last_audit");
-      if (stored) {
-        const parsed: AuditResult = JSON.parse(stored);
-        requestAnimationFrame(() => setResult(parsed));
-      } else {
-        router.replace("/diagnose");
-      }
-    } catch {
-      router.replace("/diagnose");
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+export default async function ReportPage({ params }: PageProps) {
+  const { id } = await params;
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <Header />
-        <main className="flex flex-1 items-center justify-center pt-16">
-          <div className="flex flex-col items-center gap-3">
-            <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            <p className="text-sm text-muted-foreground">Analyzing stack...</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+  const { data: audit, error } = await supabase
+    .from("audits")
+    .select("*")
+    .eq("slug", id)
+    .single();
+
+  if (error || !audit) {
+    return <ReportClientFallback />;
   }
 
-  if (!result) return null;
+  const defaultInput = {
+    tools: [],
+    teamSize: 1,
+    primaryUseCase: "mixed" as const,
+    engineeringHeavy: false,
+    apiUsageLevel: "low" as const,
+    startupStage: "solo" as const,
+  };
+
+  const result: AuditResult = {
+    id: audit.slug,
+    slug: audit.slug,
+    totalMonthlySpend: audit.total_monthly_spend,
+    totalOptimizedSpend: audit.total_optimized_spend,
+    totalMonthlySavings: audit.total_monthly_savings,
+    totalAnnualSavings: audit.total_annual_savings,
+    efficiencyScore: audit.efficiency_score,
+    stackHealth: audit.stack_health || "optimal",
+    spendPerDev: audit.spend_per_dev,
+    avgSpendPerDev: audit.avg_spend_per_dev,
+    overlapDetected: audit.overlap_detected || false,
+    overlapTools: audit.overlap_tools || [],
+    summary: audit.summary || "",
+    aiSummary: null,
+    recommendations: (audit.recommendations || []).map(
+      (r: Record<string, unknown>) => ({
+        toolId: r.tool_id as string,
+        toolName: r.tool_name as string,
+        currentPlan: r.current_plan as string,
+        currentMonthlySpend: r.current_monthly_spend as number,
+        recommendedAction: r.recommended_action as string,
+        recommendedPlan: r.recommended_plan as string,
+        optimizedMonthlySpend: r.optimized_monthly_spend as number,
+        monthlySavings: r.monthly_savings as number,
+        annualSavings: r.annual_savings as number,
+        confidence: r.confidence as "high" | "medium" | "low",
+        reason: r.reason as string,
+        category: r.category as ToolRecommendation["category"],
+      })
+    ),
+    input: audit.input || defaultInput,
+    createdAt: audit.created_at || new Date().toISOString(),
+  };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       <Header />
-      <main className="flex-1 pt-24 pb-16">
+      <main className="min-h-screen pt-20 pb-16">
         <AuditResults result={result} />
       </main>
       <Footer />
-    </div>
+    </>
   );
 }

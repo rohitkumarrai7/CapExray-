@@ -184,3 +184,21 @@
 @utility savings-text {
   font-family: var(--font-jetbrains-mono), monospace;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .glass-card {
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  .gradient-text {
+    -webkit-text-fill-color: #333 !important;
+    background: none !important;
+  }
+}

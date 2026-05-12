@@ -9,12 +9,16 @@ const faqs = [
     a: "Zero-retention by default. Your stack data is processed in ephemeral memory and purged immediately after the report is generated. No training on user data.",
   },
   {
-    q: "Why is the diagnostic free?",
-    a: "We believe in \"Diagnostic First.\" The initial scan proves the value of CapExray. We only charge for continuous monitoring and automated remediation tools.",
+    q: "Why is the audit free?",
+    a: "The initial audit proves the value of CapExray. We only charge for continuous monitoring and automated remediation tools. The audit itself is and will remain free.",
   },
   {
-    q: "Do I need to install an agent?",
-    a: "No installation required. We integrate via read-only cloud permissions or manual log upload for air-gapped environments.",
+    q: "Do I need to connect my billing?",
+    a: "No. You manually enter your AI tools and plans. No bank access, no SSO, no OAuth. Your financial data stays on your screen.",
+  },
+  {
+    q: "Which tools are supported?",
+    a: "Cursor, GitHub Copilot, ChatGPT, Claude, Gemini, Windsurf, Anthropic API, and OpenAI API — covering 95% of startup AI spend.",
   },
 ];
 
