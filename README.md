@@ -36,7 +36,7 @@
 ## Quick Start
 
 ```bash
-git clone https://github.com/your-username/capexray.git
+git clone https://github.com/rohitkumarrai7/capexray.git
 cd capexray
 npm install
 
@@ -50,7 +50,7 @@ npm run dev
 
 ## Deploy
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/capexray)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/rohitkumarrai7/capexray-)
 
 Set these environment variables in Vercel:
 - `NEXT_PUBLIC_SUPABASE_URL`
